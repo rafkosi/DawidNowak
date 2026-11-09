@@ -135,17 +135,43 @@
 </section>
 
 <section class="section" id="kontakt">
-<div class="container contact__grid">
-<div>
+<div class="container">
+<div class="section-heading">
 <h2>Skontaktuj się z nami</h2>
 <p>Telefon odbieramy całą dobę, także w święta.</p>
-<a class="contact-phone" href="tel:+48576700580">886 179 4630</a>
-<address class="contact-box">
-<strong>Dawid Nowak – Usługi Pogrzebowe</strong><br>
-UZUPEŁNIJ: ulica i numer, 00-000 Wrocław<br>
-E-mail: <a href="mailto:kontakt@example.pl">kontakt@example.pl</a><br>
-Godziny: całodobowo, 7 dni w tygodniu
-</address>
+</div>
+
+<div class="contact-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-bottom: 40px;">
+  
+  <div class="contact-box" style="background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+    <img src="zdjecie-macieja.webp" alt="Zakład pogrzebowy Pl. św. Macieja" style="width: 100%; height: 180px; object-fit: cover; border-radius: 6px; margin-bottom: 15px;">
+    <strong>Dawid Nowak – Usługi Pogrzebowe</strong><br>
+    Pl. św. Macieja 3, 50-244 Nadodrze, Wrocław<br>
+    Telefon: <a href="tel:+48886179463"><strong>886 179 463</strong></a><br>
+    E-mail: <a href="mailto:uslugi.pogrzebowe-d.nowak@wp.pl">uslugi.pogrzebowe-d.nowak@wp.pl</a><br>
+    Godziny otwarcia:<br>
+    · Poniedziałek – Piątek: 8:00 – 18:00<br>
+    · Sobota – Niedziela: 9:00 – 14:00
+  </div>
+
+  <div class="contact-box" style="background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+    <img src="zdjecie-litewska.webp" alt="Zakład pogrzebowy Litewska" style="width: 100%; height: 180px; object-fit: cover; border-radius: 6px; margin-bottom: 15px;">
+    <strong>Dawid Nowak – Usługi Pogrzebowe</strong><br>
+    Litewska 6B, 51-354 Wrocław<br>
+    Telefon: <a href="tel:+48886179463"><strong>886 179 463</strong></a><br>
+    E-mail: <a href="mailto:uslugi.pogrzebowe-d.nowak@wp.pl">uslugi.pogrzebowe-d.nowak@wp.pl</a><br>
+    Godziny otwarcia:<br>
+    · Poniedziałek – Piątek: 8:00 – 18:00<br>
+    · Sobota – Niedziela: 9:00 – 14:00
+  </div>
+
+</div>
+
+<div class="contact__grid">
+<div style="display: flex; flex-direction: column; justify-content: center;">
+<p>Całodobowy numer alarmowy:</p>
+<a class="contact-phone" href="tel:+48576700580">576 700 580</a>
+<p class="note" style="margin-top: 15px;">Telefon odbieramy całą dobę, również w dni wolne i święta.</p>
 </div>
 <form class="form" action="https://formspree.io/f/TWOJ_ID" method="post">
 <h3>Napisz do nas</h3>
@@ -157,7 +183,35 @@ Godziny: całodobowo, 7 dni w tygodniu
 <p class="note">Jeśli sprawa jest pilna, prosimy o telefon.</p>
 </form>
 </div>
-<div class="container map"><iframe title="Mapa dojazdu – Dawid Nowak Usługi Pogrzebowe" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q=Wroc%C5%82aw&amp;output=embed"></iframe></div>
+
+<div class="container map" style="margin-top: 40px;">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <div id="dwie-pinezki-mapa" style="width: 100%; height: 400px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"></div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      var map = L.map('dwie-pinezki-mapa').setView([51.1205, 17.0322], 13);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      var marker1 = L.marker([51.1189, 17.0315]).addTo(map);
+      marker1.bindPopup("<b>Dawid Nowak – Usługi Pogrzebowe</b><br>Pl. św. Macieja 3, Wrocław");
+
+      var marker2 = L.marker([51.1442, 17.1121]).addTo(map);
+      marker2.bindPopup("<b>Dawid Nowak – Usługi Pogrzebowe</b><br>Litewska 6B, Wrocław");
+
+      var group = new L.featureGroup([marker1, marker2]);
+      map.fitBounds(group.getBounds().pad(0.2));
+    });
+  </script>
+</div>
+
+</div>
 </section>
 </main>
 
