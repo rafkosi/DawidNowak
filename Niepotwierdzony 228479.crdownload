@@ -1,0 +1,87 @@
+const btn=document.querySelector(".menu-toggle"),nav=document.querySelector(".nav");
+if(btn&&nav){
+  const set=o=>{nav.classList.toggle("is-open",o);btn.setAttribute("aria-expanded",String(o));btn.textContent=o?"×":"☰";btn.setAttribute("aria-label",o?"Zamknij menu":"Otwórz menu")};
+  btn.addEventListener("click",()=>set(!nav.classList.contains("is-open")));
+  nav.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>set(false)));
+  document.addEventListener("keydown",e=>{if(e.key==="Escape")set(false)});
+}
+const y=document.getElementById("year");if(y)y.textContent=new Date().getFullYear();
+
+document.querySelectorAll("[data-open]").forEach(b=>b.addEventListener("click",()=>document.getElementById(b.dataset.open).showModal()));
+document.querySelectorAll(".obit-dialog").forEach(d=>{d.addEventListener("click",e=>{if(e.target===d||e.target.hasAttribute("data-close"))d.close()})});
+// ===== MAPA: jedna mapa, 2 pinezki (bez trasy), link do Google Maps w każdej =====
+const MAPA = {
+  // OPCJA A (zalecana, prawdziwa mapa Google z 2 pinezkami):
+  // wklej samo ID mapy z Google My Maps (z linku .../maps/d/embed?mid=TUTAJ_ID). Puste = używamy mapy Leaflet/OpenStreetMap.
+  myMapsId: "",
+  // OPCJA B (domyślna): mapa Leaflet. Jeśli podasz coords [szer, dł] (prawy klik w Google Maps -> kliknij współrzędne),
+  // pinezka stanie dokładnie tam; bez coords adres zostanie zlokalizowany automatycznie (Nominatim).
+  points: [
+    { name: "Plac św. Macieja 3", address: "Plac św. Macieja 3, 50-244 Wrocław", coords: null },
+    { name: "Litewska 6B",        address: "Litewska 6B, 51-354 Wrocław",        coords: null }
+  ]
+};
+
+const mapaContainer = document.getElementById("mapa");
+if (mapaContainer) {
+  const gmapsUrl = a => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(a);
+  const fail = () => { mapaContainer.innerHTML = '<p class="mapa-info">Nie udało się załadować mapy. Skorzystaj z linków poniżej.</p>'; };
+  const addCss = href => new Promise((ok, no) => { const l = document.createElement("link"); l.rel = "stylesheet"; l.href = href; l.onload = ok; l.onerror = no; document.head.appendChild(l); });
+  const addJs = src => new Promise((ok, no) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
+  const geocode = async p => {
+    if (p.coords) return p.coords;
+    const r = await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=pl&q=" + encodeURIComponent(p.address), { headers: { "Accept-Language": "pl" } });
+    const j = await r.json();
+    if (!j.length) throw new Error("brak wyniku: " + p.address);
+    return [parseFloat(j[0].lat), parseFloat(j[0].lon)];
+  };
+
+  const loadMap = async () => {
+    // Opcja A: Google My Maps (iframe)
+    if (MAPA.myMapsId) {
+      mapaContainer.innerHTML = "";
+      const f = document.createElement("iframe");
+      f.src = "https://www.google.com/maps/d/embed?mid=" + encodeURIComponent(MAPA.myMapsId);
+      f.title = "Mapa Google z dwoma punktami: Plac św. Macieja 3 oraz Litewska 6B";
+      f.loading = "lazy"; f.referrerPolicy = "no-referrer-when-downgrade";
+      f.style.cssText = "display:block;width:100%;height:100%;border:0";
+      mapaContainer.appendChild(f);
+      return;
+    }
+    // Opcja B: Leaflet (CSS + JS muszą być oba, inaczej mapa się rozsypuje)
+    const base = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/";
+    try {
+      await Promise.all([addCss(base + "leaflet.min.css"), addJs(base + "leaflet.min.js")]);
+      const coords = await Promise.all(MAPA.points.map(geocode));
+      mapaContainer.innerHTML = "";
+      L.Icon.Default.imagePath = base + "images/";
+      const map = L.map(mapaContainer, { scrollWheelZoom: false });
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      }).addTo(map);
+      MAPA.points.forEach((p, i) => {
+        const el = document.createElement("div");
+        el.innerHTML = "<b>Dawid Nowak – Usługi Pogrzebowe</b><br>" + p.name + ", Wrocław<br>";
+        const a = document.createElement("a");
+        a.href = gmapsUrl(p.address); a.target = "_blank"; a.rel = "noopener"; a.textContent = "Otwórz w Google Maps";
+        el.appendChild(a);
+        L.marker(coords[i]).addTo(map).bindPopup(el);
+      });
+      map.fitBounds(L.latLngBounds(coords), { padding: [50, 50], maxZoom: 15 });
+    } catch (e) {
+      console.error("Mapa:", e);
+      fail();
+    }
+  };
+
+  // Ładowanie dopiero po przewinięciu do mapy
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries, obs) => {
+      if (entries.some(e => e.isIntersecting)) { obs.disconnect(); loadMap(); }
+    }, { rootMargin: "200px" });
+    observer.observe(mapaContainer);
+  } else {
+    loadMap();
+  }
+}

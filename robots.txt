@@ -1,3 +1,4 @@
+# Zamień MIEJSCE_NA_TWOJA_DOMENE.pl na docelową domenę.
 User-agent: *
 Allow: /
-Sitemap: https://www.example.pl/sitemap.xml
+Sitemap: https://MIEJSCE_NA_TWOJA_DOMENE.pl/sitemap.xml
